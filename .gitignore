@@ -20,7 +20,6 @@ npm-debug.log*
 # Ignore built assets
 build
 .cache
-.env*
 newrelic_agent.log
 
 # Ignore IDE settings
