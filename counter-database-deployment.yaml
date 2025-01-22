@@ -1,29 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
-volumeMounts:
-- name: counter-database-data
-  mountPath: /var/lib/pgsql/data
-volumes:
-- name: counter-database-data
-  persistentVolumeClaim:
-    claimName: counter-database-data
 metadata:
   name: counter-database
+  labels:
+    app: counter-database
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: counter-database
+      tier: database
   template:
     metadata:
       labels:
         app: counter-database
+        tier: database
     spec:
       containers:
-      - name: counter-database
+      - name: postgres
         image: registry.redhat.io/rhel8/postgresql-15:latest
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         ports:
         - containerPort: 5432
-        envFrom:
-        - secretRef:
-            name: counter-database
+        env:
+        - name: POSTGRESQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: counter-database
+              key: database-user
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: counter-database
+              key: database-password
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: counter-database
+              key: database-name
